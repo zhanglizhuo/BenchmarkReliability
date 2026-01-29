@@ -24,6 +24,16 @@ pip install -r requirements.txt
 
 ## Usage
 
+### Demo Mode (Recommended First)
+
+Test the tool with sample data:
+
+```bash
+python demo.py
+```
+
+### Production Mode
+
 Run the script to scrape teacher profiles from the configured URL:
 
 ```bash
@@ -36,6 +46,8 @@ The script will:
 3. Scrape each teacher's profile page
 4. Filter teachers based on predefined criteria
 5. Display matching teachers and save results to `teacher_profiles.json`
+
+For more details, see [USAGE.md](USAGE.md)
 
 ## Configuration
 
