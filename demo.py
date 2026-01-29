@@ -5,6 +5,7 @@ ResearchBuddy Demo - Demonstrates functionality with sample data
 
 import json
 import sys
+from typing import Optional
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from research_buddy import TeacherProfileScraper, TeacherMatcher
@@ -15,10 +16,11 @@ class DemoScraper(TeacherProfileScraper):
     """Demo scraper that uses sample data instead of real HTTP requests"""
     
     def __init__(self):
-        self.base_url = "https://nxy.hunau.edu.cn/xygk/szdw_9365/"
+        # Initialize parent class with demo URL
+        super().__init__("https://nxy.hunau.edu.cn/xygk/szdw_9365/", timeout=30, delay=0)
         self.sample_profiles = SAMPLE_PROFILES
     
-    def fetch_page(self, url: str):
+    def fetch_page(self, url: str) -> Optional[str]:
         """Fetch HTML from sample data"""
         if url == self.base_url:
             return SAMPLE_LIST_HTML

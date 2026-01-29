@@ -9,33 +9,60 @@ from bs4 import BeautifulSoup
 import re
 import json
 import sys
-from typing import List, Dict, Optional
+import time
+from typing import List, Dict, Optional, Any
 from urllib.parse import urljoin, urlparse
 
 
 class TeacherProfileScraper:
     """Scraper for teacher profile pages"""
     
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, timeout: int = 30, delay: float = 0.5):
         self.base_url = base_url
+        self.timeout = timeout
+        self.delay = delay  # Delay between requests to avoid overwhelming the server
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         })
     
     def fetch_page(self, url: str) -> Optional[str]:
-        """Fetch HTML content from a URL"""
+        """
+        Fetch HTML content from a URL with domain validation
+        
+        Args:
+            url: The URL to fetch
+            
+        Returns:
+            HTML content as string, or None if fetch fails
+        """
+        # Validate that URL is within the expected domain
+        parsed_base = urlparse(self.base_url)
+        parsed_url = urlparse(url)
+        
+        if parsed_url.netloc and parsed_url.netloc != parsed_base.netloc:
+            print(f"Warning: Skipping external URL: {url}", file=sys.stderr)
+            return None
+        
         try:
-            response = self.session.get(url, timeout=30)
+            response = self.session.get(url, timeout=self.timeout)
             response.raise_for_status()
             response.encoding = response.apparent_encoding  # Handle Chinese encoding
             return response.text
-        except Exception as e:
+        except (requests.RequestException, requests.Timeout) as e:
             print(f"Error fetching {url}: {e}", file=sys.stderr)
             return None
     
     def parse_teacher_list(self, html: str) -> List[Dict[str, str]]:
-        """Parse the teacher list page to extract teacher information"""
+        """
+        Parse the teacher list page to extract teacher information
+        
+        Args:
+            html: HTML content of the teacher list page
+            
+        Returns:
+            List of dictionaries containing 'name', 'url', and 'link_href' for each teacher
+        """
         soup = BeautifulSoup(html, 'lxml')
         teachers = []
         
@@ -53,13 +80,18 @@ class TeacherProfileScraper:
             full_url = urljoin(self.base_url, href)
             
             # Filter for likely teacher profile pages
-            # Skip obvious non-profile links
-            skip_keywords = ['首页', '返回', '更多', '下一页', '上一页', 'home', 'index', 'list']
-            if any(keyword in text.lower() for keyword in skip_keywords):
+            # Skip obvious non-profile links (Chinese keywords)
+            chinese_skip = ['首页', '返回', '更多', '下一页', '上一页']
+            # Skip obvious non-profile links (English keywords - case insensitive)
+            english_skip = ['home', 'index', 'list']
+            
+            if any(keyword in text for keyword in chinese_skip):
+                continue
+            if any(keyword in text.lower() for keyword in english_skip):
                 continue
             
             # Check if it looks like a profile link
-            if 'info' in href or 'teacher' in href or '_' in href or text:
+            if 'info' in href or 'teacher' in href or '_' in href:
                 teachers.append({
                     'name': text,
                     'url': full_url,
@@ -68,8 +100,25 @@ class TeacherProfileScraper:
         
         return teachers
     
-    def parse_teacher_profile(self, html: str, url: str) -> Dict[str, any]:
-        """Parse individual teacher profile page"""
+    def parse_teacher_profile(self, html: str, url: str) -> Dict[str, Any]:
+        """
+        Parse individual teacher profile page to extract structured information
+        
+        Args:
+            html: HTML content of the teacher profile page
+            url: URL of the profile page
+            
+        Returns:
+            Dictionary containing extracted profile information:
+                - url: Profile page URL
+                - name: Teacher's name
+                - title: Academic title/position
+                - department: Department/division
+                - research_areas: List of research areas
+                - education: List of education background entries
+                - contact: Dictionary with email and phone
+                - raw_text: Full text content for additional searching
+        """
         soup = BeautifulSoup(html, 'lxml')
         profile = {
             'url': url,
@@ -119,7 +168,7 @@ class TeacherProfileScraper:
                 profile['research_areas'] = [r.strip() for r in re.split('[，,;；]', research_text)]
             
             # Education (学历, 教育背景)
-            edu_pattern = re.compile(r'(?:学历|教育背景|学习经历)[：:]([^]+?)(?=\n\n|\n[一-龥]{2,}[：:]|$)', re.DOTALL)
+            edu_pattern = re.compile(r'(?:学历|教育背景|学习经历)[：:]([^\n]+?)(?=\n\n|\n[一-龥]{2,}[：:]|$)', re.DOTALL)
             edu_match = edu_pattern.search(text)
             if edu_match:
                 edu_text = edu_match.group(1).strip()
@@ -137,8 +186,16 @@ class TeacherProfileScraper:
         
         return profile
     
-    def scrape_all_teachers(self, list_url: str) -> List[Dict[str, any]]:
-        """Scrape all teacher profiles from a teacher list page"""
+    def scrape_all_teachers(self, list_url: str) -> List[Dict[str, Any]]:
+        """
+        Scrape all teacher profiles from a teacher list page
+        
+        Args:
+            list_url: URL of the teacher list page
+            
+        Returns:
+            List of dictionaries containing profile information for each teacher
+        """
         print(f"Fetching teacher list from: {list_url}")
         html = self.fetch_page(list_url)
         
@@ -154,6 +211,10 @@ class TeacherProfileScraper:
             print(f"\n[{i}/{len(teachers_list)}] Fetching profile: {teacher_info['name']}")
             print(f"  URL: {teacher_info['url']}")
             
+            # Add delay between requests to avoid overwhelming the server
+            if i > 1:
+                time.sleep(self.delay)
+            
             profile_html = self.fetch_page(teacher_info['url'])
             if profile_html:
                 profile = self.parse_teacher_profile(profile_html, teacher_info['url'])
@@ -168,11 +229,19 @@ class TeacherProfileScraper:
 class TeacherMatcher:
     """Filter and match teachers based on criteria"""
     
-    def __init__(self, criteria: Dict[str, any] = None):
+    def __init__(self, criteria: Dict[str, Any] = None):
         self.criteria = criteria or {}
     
-    def matches(self, profile: Dict[str, any]) -> bool:
-        """Check if a teacher profile matches the criteria"""
+    def matches(self, profile: Dict[str, Any]) -> bool:
+        """
+        Check if a teacher profile matches the criteria
+        
+        Args:
+            profile: Dictionary containing teacher profile information
+            
+        Returns:
+            True if profile matches all specified criteria, False otherwise
+        """
         
         # Check title requirements
         if 'required_titles' in self.criteria:
@@ -200,8 +269,16 @@ class TeacherMatcher:
         
         return True
     
-    def filter_teachers(self, profiles: List[Dict[str, any]]) -> List[Dict[str, any]]:
-        """Filter teachers based on criteria"""
+    def filter_teachers(self, profiles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Filter teachers based on criteria
+        
+        Args:
+            profiles: List of teacher profile dictionaries
+            
+        Returns:
+            Filtered list of profiles that match the criteria
+        """
         return [p for p in profiles if self.matches(p)]
 
 
