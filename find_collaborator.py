@@ -15,6 +15,10 @@ class CollaboratorFinder:
     """查找科研合作人选的类"""
     
     def __init__(self, url):
+        if not url or not isinstance(url, str):
+            raise ValueError("URL必须是非空字符串")
+        if not url.startswith(('http://', 'https://', 'mock://')):
+            raise ValueError("URL必须以http://、https://或mock://开头")
         self.url = url
         self.faculty_list = []
         
@@ -22,7 +26,7 @@ class CollaboratorFinder:
         """获取网页内容"""
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
             response = requests.get(self.url, headers=headers, timeout=10)
             response.encoding = 'utf-8'
@@ -63,7 +67,6 @@ class CollaboratorFinder:
             'name': '',
             'title': '',
             'education': '',
-            'research': '',
             'has_papers': False,
             'raw_text': text
         }
@@ -88,8 +91,8 @@ class CollaboratorFinder:
         elif '学士' in text:
             info['education'] = '学士'
         
-        # 检查是否有科研论文
-        research_keywords = ['论文', '期刊', 'SCI', 'EI', 'CSSCI', '发表', '研究方向', '科研']
+        # 检查是否有科研论文（使用更具体的关键词）
+        research_keywords = ['论文', '期刊', 'SCI', 'EI', 'CSSCI', '发表']
         for keyword in research_keywords:
             if keyword in text:
                 info['has_papers'] = True
@@ -102,7 +105,7 @@ class CollaboratorFinder:
         
         return info
     
-    def filter_candidates(self, prefer_lecturer=True):
+    def filter_candidates(self):
         """筛选合适的候选人"""
         # 优先条件：讲师 + 博士 + 有科研论文
         priority_candidates = []
