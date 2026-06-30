@@ -18,9 +18,9 @@ class CollegeScorecardSource(DatasetSource):
     license_info = "Public Domain (OpenML)"
     reference = "US Dept of Education; OpenML ID 42121"
     task = "regression"
-    n_samples = 7804
-    n_features = 40
-    n_groups = 59
+    n_samples = 2220  # 7804 in source, filtered to 2220 with admission_rate
+    n_features = 30   # 40 in source, 30 numeric after filtering
+    n_groups = 55  # 59 states in source, 55 after filtering for admission_rate
     grouping_description = "US State (59 groups)"
     sha256 = "d4dca5f3d35fba46a164a1e8a59c35d643a89cbc25a216431a44913dd4cf5e00"
     notes = "7804 US colleges. Target: admission rate."

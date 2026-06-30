@@ -59,7 +59,7 @@ class StudentDepressionSource(DatasetSource):
         city_counts = df["City"].value_counts()
         valid = city_counts[city_counts >= 5].index
         df = df[df["City"].isin(valid)].copy()
-        y = y[mask]
+        y = df["Depression"].astype(float).values
 
         # Numeric features
         num_cols = ["Age", "Academic Pressure", "CGPA", "Study Satisfaction",
