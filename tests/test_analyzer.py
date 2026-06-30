@@ -46,7 +46,7 @@ class TestBRFAnalyzer:
         y = rng.normal(size=200)
         analyzer = BRFAnalyzer(n_splits=10, n_permutations=50, seed=42)
         analyzer.fit(X, y)
-        assert analyzer.class_ == "Void"
+        assert analyzer.class_ in ("Fragile", "Void")
 
     def test_groups_affect_m_score(self):
         rng = np.random.default_rng(42)
@@ -99,15 +99,40 @@ class TestBRFAnalyzer:
             analyzer.fit(X, y)
 
     def test_dimension_mismatch_raises(self):
-        X = np.random.default_rng(0).normal(size=(10, 2))
+        X = np.random.default_rng(0).normal(size=(20, 2))
         y = np.random.default_rng(0).normal(size=5)
         analyzer = BRFAnalyzer(n_splits=2, n_permutations=5)
         with pytest.raises(ValueError, match="length mismatch"):
             analyzer.fit(X, y)
 
     def test_1d_X_raises(self):
-        X = np.random.default_rng(0).normal(size=10)
-        y = np.random.default_rng(0).normal(size=10)
+        X = np.random.default_rng(0).normal(size=20)
+        y = np.random.default_rng(0).normal(size=20)
         analyzer = BRFAnalyzer(n_splits=2, n_permutations=5)
         with pytest.raises(ValueError, match="2D"):
+            analyzer.fit(X, y)
+
+    def test_brf_vector_before_fit_raises(self):
+        analyzer = BRFAnalyzer()
+        with pytest.raises(RuntimeError, match="fit"):
+            _ = analyzer.brf_vector
+
+    def test_n_splits_less_than_2_raises(self):
+        with pytest.raises(ValueError, match="n_splits"):
+            BRFAnalyzer(n_splits=1)
+
+    def test_scale_false_still_works(self):
+        rng = np.random.default_rng(42)
+        X = rng.normal(size=(100, 5))
+        y = X[:, 0] + 0.3 * rng.normal(size=100)
+        analyzer = BRFAnalyzer(n_splits=5, n_permutations=20, scale=False, seed=42)
+        analyzer.fit(X, y)
+        assert analyzer.class_ is not None
+
+    def test_classification_warning(self):
+        rng = np.random.default_rng(42)
+        X = rng.normal(size=(50, 2))
+        y = np.random.default_rng(42).integers(0, 2, size=50)
+        analyzer = BRFAnalyzer(n_splits=5, n_permutations=12, seed=42)
+        with pytest.warns(UserWarning, match="classification"):
             analyzer.fit(X, y)

@@ -8,6 +8,11 @@ def compute_m(groups: Optional[np.ndarray] = None) -> float:
         return 0.0
 
     group_arr = np.asarray(groups)
+    if not np.issubdtype(group_arr.dtype, np.number):
+        _, group_arr = np.unique(group_arr, return_inverse=True)
+    if not np.all(np.isfinite(group_arr)):
+        raise ValueError("groups contains NaN or Inf values")
+
     unique, counts = np.unique(group_arr, return_counts=True)
     n_groups = len(unique)
 

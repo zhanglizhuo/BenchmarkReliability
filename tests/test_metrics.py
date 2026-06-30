@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from brf.metrics import compute_b, compute_i, compute_n, compute_m
 
@@ -112,3 +113,13 @@ class TestComputeM:
             groups = rng.integers(0, n // 2, size=100)
             m = compute_m(groups=groups)
             assert 0.0 <= m <= 1.0
+
+    def test_nan_groups_raises(self):
+        groups = np.array([0, 1, np.nan, 1, 0])
+        with pytest.raises(ValueError, match="NaN"):
+            compute_m(groups=groups)
+
+    def test_non_numeric_groups_converted(self):
+        groups = np.array(["a", "b", "c", "a", "b"])
+        m = compute_m(groups=groups)
+        assert m > 0.0
