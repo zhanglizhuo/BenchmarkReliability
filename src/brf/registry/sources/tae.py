@@ -10,6 +10,7 @@ class TAESource(DatasetSource):
     name = "tae"
     display_name = "Teaching Assistant Evaluation"
     version = "1.0"
+    sha256 = "e83ec0a1000f4d2a7d19de9de2fc8c381357304c5c8ff942779136a9e0eefca4"
     source_url = "https://archive.ics.uci.edu/static/public/100/teaching+assistant+evaluation.zip"
     license_info = "CC BY 4.0"
     reference = "Loh (1997); UCI ID 100"

@@ -10,6 +10,7 @@ class TurkiyeSource(DatasetSource):
     name = "turkiye"
     display_name = "Turkiye Student Evaluation"
     version = "1.0"
+    sha256 = "e5c4bf0f98af39adbc0bd23ddbc7ab1d5ffbcf028e7540a464ff6d725cb5f2eb"
     source_url = "https://archive.ics.uci.edu/static/public/262/turkiye+student+evaluation.zip"
     license_info = "CC BY 4.0"
     reference = "Gazi University; UCI ID 262"
