@@ -22,6 +22,7 @@ class CollegeScorecardSource(DatasetSource):
     n_features = 40
     n_groups = 59
     grouping_description = "US State (59 groups)"
+    sha256 = "d4dca5f3d35fba46a164a1e8a59c35d643a89cbc25a216431a44913dd4cf5e00"
     notes = "7804 US colleges. Target: admission rate."
 
     def download(self):

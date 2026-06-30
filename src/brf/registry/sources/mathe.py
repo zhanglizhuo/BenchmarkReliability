@@ -18,6 +18,7 @@ class MathESource(DatasetSource):
     n_features = 26
     n_groups = 14
     grouping_description = "Math Topic (14 categories)"
+    sha256 = "97844121a1e4cc6b7ad435f9ed6710d84141fc8fe61087df8bc5eb77b22e060c"
     notes = "Question-level aggregation of 9546 student answers."
 
     def download(self):

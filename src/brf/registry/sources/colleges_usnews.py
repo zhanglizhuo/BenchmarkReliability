@@ -22,6 +22,7 @@ class CollegesUSNewsSource(DatasetSource):
     n_features = 31
     n_groups = 51
     grouping_description = "US State (51 groups)"
+    sha256 = "c96a8f3e34764ce52442bf10c50a4170260993de35ada0c7d82a8c6fec75104a"
     notes = "1204 US colleges. Target: graduation rate."
 
     def download(self):

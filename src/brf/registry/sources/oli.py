@@ -22,6 +22,7 @@ class OLISource(DatasetSource):
     n_features = 2
     n_groups = 19
     grouping_description = "Curriculum module (19 groups)"
+    sha256 = "8ba76de29f34cf9ffbbb6ef49b83875a6971af25a449a066da6371257edd99d9"
     notes = "Engineering Statics course. Step-level prediction."
 
     def download(self):

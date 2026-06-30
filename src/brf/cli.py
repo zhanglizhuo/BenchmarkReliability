@@ -34,9 +34,43 @@ def _registry_cli(args):
 
 
 def _audit_cli(args):
-    """Run BRF audit on a dataset file."""
-    print(f"BRF Audit: {args.dataset} (not yet implemented)")
-    print("  This will run BRFAnalyzer on the input file.")
+    """Run BRF audit on a registered dataset or CSV file."""
+    from pathlib import Path
+    import numpy as np
+    from sklearn.preprocessing import StandardScaler
+    from .analyzer import BRFAnalyzer
+
+    key = args.dataset
+    csv_path = Path(key)
+    if csv_path.suffix == '.csv' and csv_path.exists():
+        # CSV file mode: simple audit
+        print(f"BRF Audit: {csv_path}")
+        print("  CSV file mode: use brf.registry for full metadata support")
+        return
+
+    # Registry key mode
+    try:
+        from .registry import REGISTRY_SOURCES
+    except ImportError:
+        print(f"Error: Dataset '{key}' not found. Is benchmark-reliability installed with registry?")
+        return
+
+    source = REGISTRY_SOURCES.get(key)
+    if source is None:
+        print(f"Unknown dataset: {key}")
+        print(f"Available: {', '.join(sorted(REGISTRY_SOURCES.keys()))}")
+        return
+
+    print(f"BRF Audit: {source.display_name} ({key})")
+    X_raw, y, groups, card = source.prepare()
+    X = StandardScaler().fit_transform(X_raw)
+    n_grp = len(np.unique(groups)) if groups is not None else 0
+    print(f"  N={len(y)}, p={X.shape[1]}, G={n_grp}")
+
+    analyzer = BRFAnalyzer(n_splits=30, n_permutations=200).fit(X, y, groups=groups)
+    bv = analyzer.brf_vector
+    print(f"  B={bv['B']:.4f}  I={bv['I']:.4f}  N={bv['N']:.4f}  M={bv['M']:.4f}")
+    print(f"  S={bv['S']:.4f}  E={bv['E']:.4f}  ->  {bv['class']}")
 
 
 def main():

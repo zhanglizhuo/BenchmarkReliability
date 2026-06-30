@@ -18,6 +18,7 @@ class CollegesAAUPSource(DatasetSource):
     n_features = 9
     n_groups = 52
     grouping_description = "US State (52 groups)"
+    sha256 = "5eafc5406a35b84887cd3bd13721615fbb73e33cf304b77bfbe38b5e16668ace"
     notes = "1161 US colleges. Institutional-level prediction."
 
     def download(self):

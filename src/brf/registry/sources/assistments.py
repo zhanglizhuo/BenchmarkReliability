@@ -22,6 +22,7 @@ class ASSISTmentsSource(DatasetSource):
     n_features = 5
     n_groups = 124
     grouping_description = "Teacher (124 categories)"
+    sha256 = "1aa296e00b6c88c4d6fad4ca2ae4866484d9fe5484f38f5c8c94dfc49f045e08"
     notes = "Student-level aggregates of 401K transactions."
 
     def download(self):
