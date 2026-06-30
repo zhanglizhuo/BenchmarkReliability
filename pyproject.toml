@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "benchmark-reliability"
+version = "0.1.0"
+description = "Benchmark Reliability Field (BRF) — dataset-level reliability auditing for predictive benchmarks"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21",
+    "scipy>=1.7",
+    "scikit-learn>=1.0",
+    "matplotlib>=3.5",
+    "pandas>=1.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/zhanglizhuo/BehaviorAudit"
+Repository = "https://github.com/zhanglizhuo/BehaviorAudit"
+
+[tool.setuptools.packages.find]
+where = ["src"]
