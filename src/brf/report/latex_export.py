@@ -1,4 +1,8 @@
 def export_latex(brf_vector: dict) -> str:
+    """Export BRF vector as a LaTeX table (requires booktabs package)."""
+    for v in brf_vector.values():
+        if v is None:
+            raise ValueError("BRF vector contains None values; call fit() first")
     lines = [
         r"\begin{tabular}{lcc}",
         r"\toprule",

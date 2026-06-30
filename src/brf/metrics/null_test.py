@@ -8,6 +8,10 @@ def compute_n(
     n_permutations: int = 500,
     seed: int = 42,
 ) -> float:
+    """Simple permutation test: shuffle y and compare R² against fixed predictions.
+    Does NOT retrain the model per permutation (see BRFAnalyzer for the
+    per-fold retrain version used in the full BRF protocol).
+    """
     rng = np.random.default_rng(seed)
     r2_real = r2_score(y_true, y_pred_real)
 

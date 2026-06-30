@@ -74,15 +74,19 @@ class TestBRFAnalyzer:
         assert analyzer.class_ is not None
 
     def test_nan_input_raises(self):
-        X = np.array([[1.0, np.nan], [2.0, 3.0], [4.0, 5.0], [6.0, 7.0], [8.0, 9.0]])
-        y = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        rng = np.random.default_rng(0)
+        X = rng.normal(size=(20, 3))
+        X[0, 0] = np.nan
+        y = rng.normal(size=20)
         analyzer = BRFAnalyzer(n_splits=2, n_permutations=5)
         with pytest.raises(ValueError, match="NaN"):
             analyzer.fit(X, y)
 
     def test_inf_input_raises(self):
-        X = np.array([[1.0, np.inf], [2.0, 3.0], [4.0, 5.0], [6.0, 7.0], [8.0, 9.0]])
-        y = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        rng = np.random.default_rng(0)
+        X = rng.normal(size=(20, 3))
+        X[0, 0] = np.inf
+        y = rng.normal(size=20)
         analyzer = BRFAnalyzer(n_splits=2, n_permutations=5)
         with pytest.raises(ValueError, match="Inf"):
             analyzer.fit(X, y)
@@ -91,7 +95,7 @@ class TestBRFAnalyzer:
         X = np.random.default_rng(0).normal(size=(3, 2))
         y = np.random.default_rng(0).normal(size=3)
         analyzer = BRFAnalyzer(n_splits=2, n_permutations=5)
-        with pytest.raises(ValueError, match="5 samples"):
+        with pytest.raises(ValueError, match="20 samples"):
             analyzer.fit(X, y)
 
     def test_dimension_mismatch_raises(self):

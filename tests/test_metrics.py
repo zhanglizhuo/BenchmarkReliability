@@ -48,6 +48,12 @@ class TestComputeI:
         assert not np.isnan(i)
         assert np.isfinite(i)
 
+    def test_near_zero_mean_does_not_explode(self):
+        values = [0.001, -0.002, 0.003, -0.001, 0.002]
+        i = compute_i(values)
+        assert np.isfinite(i)
+        assert i < 1e4
+
 
 class TestComputeN:
     def test_perfect_predictions(self):

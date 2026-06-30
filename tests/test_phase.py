@@ -1,6 +1,8 @@
 import numpy as np
+import pytest
 
 from brf.phase import compute_phase_from_brf, classify_dataset, plot_phase_diagram
+from brf.report import export_json, export_latex
 
 
 class TestEmbedding:
@@ -29,6 +31,32 @@ class TestClassifier:
 
     def test_edge_case_boundary(self):
         assert classify_dataset(S=0.5, E=0.5) == "Fragile"
+
+
+class TestReport:
+    def test_export_json_none_raises(self):
+        with pytest.raises(ValueError, match="None"):
+            export_json({"B": None, "I": 0.5}, "dummy.json")
+
+    def test_export_latex_none_raises(self):
+        with pytest.raises(ValueError, match="None"):
+            export_latex({"B": None, "I": 0.5})
+
+    def test_export_json_roundtrip(self, tmp_path):
+        p = str(tmp_path / "test.json")
+        bv = {"B": 0.8, "I": 0.1, "N": 0.95, "M": 0.5, "S": 0.85, "E": 1.3, "class": "Reliable"}
+        export_json(bv, p)
+        import json
+        with open(p) as f:
+            loaded = json.load(f)
+        assert loaded == bv
+
+    def test_export_latex_output(self):
+        bv = {"B": 0.8, "I": 0.1, "N": 0.95, "M": 0.5, "S": 0.85, "E": 1.3, "class": "Reliable"}
+        out = export_latex(bv)
+        assert "tabular" in out
+        assert "Reliable" in out
+        assert "0.800" in out
 
 
 class TestVisualization:

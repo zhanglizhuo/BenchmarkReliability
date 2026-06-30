@@ -1,3 +1,4 @@
+import math
 from typing import Optional
 
 import numpy as np
@@ -39,8 +40,8 @@ class BRFAnalyzer:
             raise ValueError(f"y must be 1D, got shape {y.shape}")
         if len(X) != len(y):
             raise ValueError(f"X and y length mismatch: {len(X)} vs {len(y)}")
-        if len(X) < 5:
-            raise ValueError(f"Need at least 5 samples, got {len(X)}")
+        if len(X) < 20:
+            raise ValueError(f"Need at least 20 samples, got {len(X)}")
         if not np.all(np.isfinite(X)):
             raise ValueError("X contains NaN or Inf values")
         if not np.all(np.isfinite(y)):
@@ -49,18 +50,19 @@ class BRFAnalyzer:
 
     def fit(self, X, y, groups=None):
         X, y = self._validate_inputs(X, y)
-        rng = np.random.default_rng(self.seed)
+        rng_cv = np.random.default_rng(self.seed)
+        rng_perm = np.random.default_rng(self.seed + 1)
         n = len(y)
 
         r2_scores = []
         b_gains = []
 
-        n_per_fold = max(1, self.n_permutations // self.n_splits)
+        n_per_fold = math.ceil(self.n_permutations / self.n_splits)
         total_permutations = self.n_splits * n_per_fold
         exceed_count = 0
 
         for i in range(self.n_splits):
-            idx = rng.permutation(n)
+            idx = rng_cv.permutation(n)
             split = max(1, int(0.8 * n))
             train_idx = idx[:split]
             test_idx = idx[split:]
@@ -78,7 +80,7 @@ class BRFAnalyzer:
             b_gains.append(compute_b(yte, y_pred, y_mean))
 
             for _ in range(n_per_fold):
-                y_perm = rng.permutation(ytr)
+                y_perm = rng_perm.permutation(ytr)
                 m_perm = clone(self.model)
                 m_perm.fit(Xtr, y_perm)
                 y_pred_perm = m_perm.predict(Xte)
