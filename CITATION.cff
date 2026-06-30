@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "BenchmarkReliability: Benchmark Reliability Framework (BRF)"
+message: "If you use this software, please cite both the BehaviorAudit paper and the software itself."
+type: software
+authors:
+  - family-names: "Zhang"
+    given-names: "Lizhuo"
+    email: "zhanglizhuo@gmail.com"
+    orcid: ""
+identifiers:
+  - type: url
+    value: "https://pypi.org/project/benchmark-reliability/"
+  - type: url
+    value: "https://github.com/zhanglizhuo/BenchmarkReliability"
+repository-code: "https://github.com/zhanglizhuo/BenchmarkReliability"
+license: "MIT"
+version: "0.1.5"
+date-released: 2026-06-30
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Zhang"
+      given-names: "Lizhuo"
+  title: "BehaviorAudit: a four-dimension pre-modeling audit protocol for educational prediction benchmarks"
+  journal: "Scientific Reports"
+  status: "under review"

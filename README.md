@@ -77,6 +77,10 @@ BehaviorAudit: a four-dimension pre-modeling audit protocol
 for educational prediction benchmarks. Scientific Reports (under review).
 ```
 
+## Related Tools
+
+- [rliable](https://github.com/google-research/rliable) (NeurIPS 2021 Outstanding Paper): statistically reliable evaluation of benchmark *results* (e.g., confidence intervals across seeds). BRF addresses a complementary question: structural reliability of the benchmark *dataset* itself (signal identifiability, instability, group adequacy).
+
 ## License
 
 MIT
