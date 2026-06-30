@@ -1,97 +1,87 @@
-# BenchmarkReliability — BRF Python Package
+# benchmark-reliability
 
-## Target
+A Python package for computing the **Benchmark Reliability Framework (BRF)**: a four-dimension audit protocol that evaluates whether a predictive dataset is structurally reliable before model development.
 
-Provide a standardized, pip-installable Python package that computes the Benchmark Reliability Field (BRF) for any predictive dataset, enabling researchers to run the four-dimension audit protocol with a single API call.
+## Installation
 
-## Method
+```bash
+pip install benchmark-reliability
+```
 
-The package wraps the core logic from the BehaviorAudit project into a sklearn-style API:
+Requires Python 3.8+ with numpy, scikit-learn, and matplotlib.
+
+## Quick Start
 
 ```python
+import numpy as np
 from brf import BRFAnalyzer
-from brf.phase import plot_phase_diagram
-from brf.report import export_json
 
+# Your data
+X = np.random.randn(200, 10)
+y = np.random.randn(200)
+groups = np.random.choice(["A", "B", "C"], 200)
+
+# Run the audit
 analyzer = BRFAnalyzer(n_splits=30, n_permutations=200).fit(X, y, groups=groups)
-print(analyzer.brf_vector)   # (B, I, N, M) → (S, E) → class
 
-# Visualization
+# Results
+print(analyzer.brf_vector)
+# {'B': 0.123, 'I': 0.045, 'N': 0.97, 'M': 0.82,
+#  'S': 0.925, 'E': 0.943, 'class': 'Reliable'}
+```
+
+## BRF Dimensions
+
+| Dimension | Name | Meaning |
+|-----------|------|---------|
+| B | Baseline Gain | Model improvement over mean predictor |
+| I | Instability | Sensitivity to train/test split choice |
+| N | Null Separability | Signal distinguishability from noise |
+| M | Metadata Sufficiency | Group structure completeness |
+
+The embedding coordinates S = N - I (Signal Identifiability) and E = B + M (Epistemic Completeness) classify datasets into one of three categories:
+
+| Class | Condition | Meaning |
+|-------|-----------|---------|
+| **Reliable** | S > 0 and E > 0.5 | Dataset supports reproducible model comparisons. Predictors carry signal beyond noise, and metadata (group structure) is adequate for cross-context evaluation. |
+| **Fragile** | S > 0 and E <= 0.5 | Predictors show signal, but metadata is insufficient. Results may not generalize across groups (e.g., schools, courses, cohorts). Use with caution and report group-aware diagnostics. |
+| **Void** | S <= 0 | No detectable signal beyond noise. Model performance on this dataset cannot be meaningfully interpreted. Consider whether the target, features, or sample size need revisiting. |
+
+## Visualization
+
+```python
+from brf.phase import plot_phase_diagram
+
 plot_phase_diagram(
     [analyzer.S], [analyzer.E],
     labels=[analyzer.class_],
     classes=[analyzer.class_],
 )
+```
 
-# Export
+## Export
+
+```python
+from brf.report import export_json, export_latex
+
 export_json(analyzer.brf_vector, "results.json")
+latex_table = export_latex(analyzer.brf_vector)
 ```
 
-## Package Structure
+## Citation
+
+If you use this package, please cite the BehaviorAudit paper:
 
 ```
-brf/
-├── __init__.py
-├── analyzer.py          ← BRFAnalyzer main class
-├── metrics/
-│   ├── baseline_gap.py  ← B
-│   ├── instability.py   ← I
-│   ├── null_test.py     ← N (permutation test)
-│   └── metadata.py      ← M
-├── phase/
-│   ├── embedding.py     ← S = N - I, E = B + M
-│   ├── classifier.py    ← Reliable / Fragile / Void
-│   └── visualization.py ← phase diagram, clustering plot
-├── report/
-│   ├── json_export.py
-│   └── latex_export.py
+BehaviorAudit: a four-dimension pre-modeling audit protocol
+for educational prediction benchmarks. Scientific Reports (under review).
 ```
 
-## Steps
+## License
 
-### Phase 1: Package skeleton (1-2 weeks)
-- [x] Initialize Python project with `pyproject.toml`
-- [x] Implement `BRFAnalyzer` main class with fit/predict interface
-- [x] Port `compute_b`, `compute_i`, `compute_n`, `compute_m` from BehaviorAudit
-- [x] Write unit tests for each metric
+MIT
 
-### Phase 2: Phase embedding + classification (1 week)
-- [x] Implement `compute_phase(S, E)` and `classify_dataset(S, E)`
-- [x] Build phase diagram visualization (matplotlib)
-- [ ] Test on all 7 datasets from BehaviorAudit; verify BRF output matches SR paper results
+## Links
 
-### Phase 3: Documentation + distribution (1-2 weeks)
-- [ ] Write README with quick-start tutorial and API docs
-- [ ] Publish to TestPyPI → PyPI
-- [ ] Set up ReadTheDocs for auto-generated documentation
-- [ ] Add GitHub Actions CI (test on Python 3.9–3.12)
-
-### Phase 4: HuggingFace Hub integration (optional, 1 week)
-- [ ] Add HF dataset loading wrapper
-- [ ] Allow `brf.fit(dataset_id="OULAD")` shorthand
-
-## Dependencies
-
-- `numpy`, `scipy`, `scikit-learn`
-- `matplotlib`, `seaborn` (visualization)
-- `pandas` (report export)
-- No deep learning dependencies required
-
-## Relationship to Sister Repos
-
-- `BehaviorAudit/`: source of the audit logic; this package refactors and generalizes it
-- `LLMScoringAudit/`: first applied use case (MM-TBA × multiple LLMs)
-- `BenchmarkPhase/`: large-scale application (30 datasets BRF leaderboard)
-- `llm-annotation/`: cited for complementary MLLM pseudo-label reliability findings
-
-## Target Journal
-
-- Journal of Open Source Software (JOSS) — tool paper, lightweight submission
-- Followed by application papers in C&E / BJET
-
-## Timeline
-
-- Phase 1–2: 3 weeks
-- Phase 3: 2 weeks
-- Phase 4: optional
-- JOSS submission: after Phase 3
+- GitHub: https://github.com/zhanglizhuo/BenchmarkReliability
+- PyPI: https://pypi.org/project/benchmark-reliability/

@@ -4,11 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "benchmark-reliability"
-version = "0.1.0"
-description = "Benchmark Reliability Field (BRF) — dataset-level reliability auditing for predictive benchmarks"
+version = "0.1.5"
+description = "Benchmark Reliability Framework (BRF) - dataset-level reliability auditing for predictive benchmarks"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
+authors = [
+    { name = "zhanglizhuo", email = "zhanglizhuo@gmail.com" },
+]
+keywords = ["benchmark reliability", "dataset auditing", "educational AI", "machine learning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "numpy>=1.21",
     "scikit-learn>=1.0",
@@ -16,8 +31,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/zhanglizhuo/BehaviorAudit"
-Repository = "https://github.com/zhanglizhuo/BehaviorAudit"
+Homepage = "https://github.com/zhanglizhuo/BenchmarkReliability"
+Repository = "https://github.com/zhanglizhuo/BenchmarkReliability"
+
+[tool.setuptools]
+license-files = []
 
 [tool.setuptools.packages.find]
 where = ["src"]
