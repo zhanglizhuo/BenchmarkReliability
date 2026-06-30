@@ -10,11 +10,21 @@ The package wraps the core logic from the BehaviorAudit project into a sklearn-s
 
 ```python
 from brf import BRFAnalyzer
+from brf.phase import plot_phase_diagram
+from brf.report import export_json
 
-report = BRFAnalyzer().fit(X, y, groups=groups)
-print(report.brf_vector)   # (B, I, N, M) → (S, E) → class
-report.plot_phase_diagram()
-report.export_json()
+analyzer = BRFAnalyzer(n_splits=30, n_permutations=200).fit(X, y, groups=groups)
+print(analyzer.brf_vector)   # (B, I, N, M) → (S, E) → class
+
+# Visualization
+plot_phase_diagram(
+    [analyzer.S], [analyzer.E],
+    labels=[analyzer.class_],
+    classes=[analyzer.class_],
+)
+
+# Export
+export_json(analyzer.brf_vector, "results.json")
 ```
 
 ## Package Structure
@@ -35,21 +45,19 @@ brf/
 ├── report/
 │   ├── json_export.py
 │   └── latex_export.py
-└── datasets/
-    └── loader.py        ← standard dataset loader API
 ```
 
 ## Steps
 
 ### Phase 1: Package skeleton (1-2 weeks)
-- [ ] Initialize Python project with `pyproject.toml`
-- [ ] Implement `BRFAnalyzer` main class with fit/predict interface
-- [ ] Port `compute_b`, `compute_i`, `compute_n`, `compute_m` from BehaviorAudit
-- [ ] Write unit tests for each metric
+- [x] Initialize Python project with `pyproject.toml`
+- [x] Implement `BRFAnalyzer` main class with fit/predict interface
+- [x] Port `compute_b`, `compute_i`, `compute_n`, `compute_m` from BehaviorAudit
+- [x] Write unit tests for each metric
 
 ### Phase 2: Phase embedding + classification (1 week)
-- [ ] Implement `compute_phase(S, E)` and `classify_dataset(S, E)`
-- [ ] Build phase diagram visualization (matplotlib)
+- [x] Implement `compute_phase(S, E)` and `classify_dataset(S, E)`
+- [x] Build phase diagram visualization (matplotlib)
 - [ ] Test on all 7 datasets from BehaviorAudit; verify BRF output matches SR paper results
 
 ### Phase 3: Documentation + distribution (1-2 weeks)

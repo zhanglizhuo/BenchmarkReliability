@@ -3,15 +3,11 @@ from typing import Optional
 import numpy as np
 
 
-def compute_m(
-    groups: Optional[np.ndarray] = None,
-    n_features: int = 0,
-    n_samples: int = 0,
-) -> float:
+def compute_m(groups: Optional[np.ndarray] = None) -> float:
     if groups is None:
         return 0.0
 
-    group_arr = np.asarray(groups)  # type: ignore
+    group_arr = np.asarray(groups)
     unique, counts = np.unique(group_arr, return_counts=True)
     n_groups = len(unique)
 

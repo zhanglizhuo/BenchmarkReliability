@@ -11,6 +11,8 @@ def plot_phase_diagram(
     classes: Optional[List[str]] = None,
     title: str = "BRF Phase Diagram",
     save_path: Optional[str] = None,
+    tau_s: float = 0.0,
+    tau_e: float = 0.5,
 ):
     fig, ax = plt.subplots(figsize=(8, 6))
 
@@ -36,8 +38,8 @@ def plot_phase_diagram(
         for i, label in enumerate(labels):
             ax.annotate(label, (S_list[i], E_list[i]), fontsize=8, alpha=0.8)
 
-    ax.axhline(y=0.5, color="gray", linestyle="--", alpha=0.4, label="E = 0.5 (Fragile boundary)")
-    ax.axvline(x=0.0, color="gray", linestyle="--", alpha=0.4, label="S = 0.0 (Void boundary)")
+    ax.axhline(y=tau_e, color="gray", linestyle="--", alpha=0.4, label=f"E = {tau_e} (Fragile boundary)")
+    ax.axvline(x=tau_s, color="gray", linestyle="--", alpha=0.4, label=f"S = {tau_s} (Void boundary)")
 
     ax.set_xlabel("Signal Identifiability (S = N - I)", fontsize=12)
     ax.set_ylabel("Epistemic Completeness (E = B + M)", fontsize=12)

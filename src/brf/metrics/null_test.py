@@ -15,7 +15,7 @@ def compute_n(
     for _ in range(n_permutations):
         y_perm = rng.permutation(y_true)
         r2_perm = r2_score(y_perm, y_pred_real)
-        if r2_real > r2_perm:
+        if r2_real >= r2_perm:
             count_exceed += 1
 
     return count_exceed / n_permutations

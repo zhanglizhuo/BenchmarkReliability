@@ -1,7 +1,6 @@
 from typing import Tuple
 
 
-
 def compute_phase_from_brf(
     B: float,
     I: float,

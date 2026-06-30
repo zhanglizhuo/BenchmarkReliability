@@ -46,3 +46,23 @@ class TestVisualization:
             E_list=[0.6, 1.0],
         )
         assert fig is not None
+
+    def test_plot_custom_thresholds(self):
+        fig = plot_phase_diagram(
+            S_list=[0.9, -0.1],
+            E_list=[0.6, 0.4],
+            tau_s=0.1,
+            tau_e=0.3,
+        )
+        assert fig is not None
+
+    def test_plot_save_path(self, tmp_path):
+        from pathlib import Path
+        save_path = str(tmp_path / "phase.png")
+        fig = plot_phase_diagram(
+            S_list=[0.5, 0.0],
+            E_list=[0.6, 1.0],
+            save_path=save_path,
+        )
+        assert Path(save_path).exists()
+        assert fig is not None

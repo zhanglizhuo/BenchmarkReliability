@@ -79,24 +79,24 @@ class TestComputeN:
 
 class TestComputeM:
     def test_no_groups(self):
-        m = compute_m(groups=None, n_features=10, n_samples=100)
+        m = compute_m(groups=None)
         assert m == 0.0
 
     def test_single_group(self):
         groups = np.zeros(100)
-        m = compute_m(groups=groups, n_features=10, n_samples=100)
+        m = compute_m(groups=groups)
         assert m == 0.0
 
     def test_perfectly_balanced_multi_group(self):
         groups = np.repeat([0, 1, 2, 3], 25)
-        m = compute_m(groups=groups, n_features=10, n_samples=100)
+        m = compute_m(groups=groups)
         assert m > 0.5
 
     def test_imbalanced_groups_lower_score(self):
         balanced = np.repeat([0, 1, 2, 3], 25)
         imbalanced = np.concatenate([np.full(85, 0), np.full(5, 1), np.full(5, 2), np.full(5, 3)])
-        m_bal = compute_m(groups=balanced, n_features=10, n_samples=100)
-        m_imb = compute_m(groups=imbalanced, n_features=10, n_samples=100)
+        m_bal = compute_m(groups=balanced)
+        m_imb = compute_m(groups=imbalanced)
         assert m_bal > m_imb
 
     def test_range_bounded_01(self):
@@ -104,5 +104,5 @@ class TestComputeM:
         for _ in range(10):
             n = rng.integers(5, 20)
             groups = rng.integers(0, n // 2, size=100)
-            m = compute_m(groups=groups, n_features=20, n_samples=100)
+            m = compute_m(groups=groups)
             assert 0.0 <= m <= 1.0
