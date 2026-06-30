@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
@@ -19,13 +21,13 @@ class BRFAnalyzer:
         self.model = model or Ridge(alpha=1.0)
         self.seed = seed
 
-        self.B: float | None = None
-        self.I: float | None = None
-        self.N: float | None = None
-        self.M: float | None = None
-        self.S: float | None = None
-        self.E: float | None = None
-        self.class_: str | None = None
+        self.B: Optional[float] = None
+        self.I: Optional[float] = None
+        self.N: Optional[float] = None
+        self.M: Optional[float] = None
+        self.S: Optional[float] = None
+        self.E: Optional[float] = None
+        self.class_: Optional[str] = None
 
     def fit(self, X, y, groups=None):
         X = np.asarray(X, dtype=float)
