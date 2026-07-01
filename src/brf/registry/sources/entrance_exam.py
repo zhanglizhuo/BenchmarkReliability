@@ -38,7 +38,8 @@ class EntranceExamSource(DatasetSource):
             # Fallback: ucimlrepo API
             from ucimlrepo import fetch_ucirepo
             d = fetch_ucirepo(id=582)
-            df = d.data.originals
+            df = d.data.features
+            df['Performance'] = d.data.targets
             df.to_csv(str(csv_path), index=False)
             return csv_path
         for f in dest_dir.glob("**/*.csv"):
