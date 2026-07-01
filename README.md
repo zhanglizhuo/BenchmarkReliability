@@ -35,7 +35,7 @@ print(source.metadata())
 #  'education_level': 'Higher Education', 'country': 'US', ...}
 ```
 
-### Browse the BRF Benchmark Registry
+### Browse the Registry
 
 ```bash
 $ brf registry list
@@ -106,21 +106,6 @@ from brf.report import export_json, export_latex
 export_json(analyzer.brf_vector, "results.json")
 latex_table = export_latex(analyzer.brf_vector)
 ```
-
-## BRF Benchmark Registry
-
-The Registry is a versioned, Dataset-as-Code collection of 18 unique
-group-aware educational prediction benchmarks (25 entries including
-alternative grouping views). Each dataset is a self-contained Python
-module with download, SHA-256 verification, and standardized
-preprocessing.
-
-- 16 DatasetSource modules (8 with SHA-256 verified)
-- Enriched metadata: education level, country, year, domain, grouping rationale
-- CLI for sync, verification, and inspection
-- Versioned releases (v1.5 current) with frozen snapshots for reproducibility
-
-Adding a dataset = one `.py` file. Auto-discovered on import.
 
 ## Citation
 
