@@ -34,6 +34,7 @@ class MMTBASource(DatasetSource):
     n_samples = 186
     n_features = 13
     n_groups = 0
+    sha256 = "81a12044d6c102453311970def1d80c8230fb4ed661d9a363436f59df968a93f"
     grouping_description = "None (no grouping metadata)"
     notes = "LLM-scored benchmark. Features extracted from lecture transcripts and GPT-4 rubric reports."
 

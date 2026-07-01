@@ -21,6 +21,7 @@ class UCIStudentMathSource(DatasetSource):
     n_samples = 395
     n_features = 56
     n_groups = 2
+    sha256 = "e47f9ee225e1ee6e69b7564e6dac7123e80b8486677fe111f351964cef5dec80"
     grouping_description = "School (2: GP/MS)"
 
     def download(self):

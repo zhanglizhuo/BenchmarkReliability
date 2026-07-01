@@ -22,6 +22,7 @@ class XAPIEduSource(DatasetSource):
     n_samples = 480
     n_features = 72
     n_groups = 12
+    sha256 = "ca48b2373f389b32d57b62293f3930f82a3d93eb7f84457940df69208e2edade"
     grouping_description = "Topic (12 subjects)"
 
     def download(self):

@@ -32,8 +32,6 @@ class StudentsExamScoresSource(DatasetSource):
         if csv_path.exists():
             return csv_path
         
-        os.environ.setdefault('HTTP_PROXY', 'http://Clash:meO8PQ5J@192.168.1.234:7890')
-        os.environ.setdefault('HTTPS_PROXY', 'http://Clash:meO8PQ5J@192.168.1.234:7890')
         
         import kagglehub
         path = Path(kagglehub.dataset_download("desalegngeb/students-exam-scores"))

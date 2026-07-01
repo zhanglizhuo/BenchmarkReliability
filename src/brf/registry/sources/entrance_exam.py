@@ -20,6 +20,7 @@ class EntranceExamSource(DatasetSource):
     n_samples = 666
     n_features = 49
     n_groups = 3
+    sha256 = "6f7545c3876f72c1789b0938eca1ed50cce2da59368621184e1f874f5fa50b10"
     grouping_description = "Qualification board (3: SEBA/CBSE/OTHERS)"
 
     def download(self):
