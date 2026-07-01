@@ -126,7 +126,7 @@ To cite the BRF framework and package (JOSS paper forthcoming):
   author = {Lizhuo Zhang},
   title = {benchmark-reliability: Benchmark Reliability Framework},
   url = {https://github.com/zhanglizhuo/BenchmarkReliability},
-  version = {0.1.5},
+  version = {0.2.1},
   year = {2026},
 }
 ```
