@@ -1,6 +1,6 @@
 # benchmark-reliability
 
-**Benchmark Reliability Framework (BRF)** — audit whether a predictive benchmark
+**Benchmark Reliability Framework (BRF)**  --  audit whether a predictive benchmark
 dataset is structurally reliable *before* model development.
 
 ```
@@ -78,7 +78,7 @@ $ brf registry info oulad
 | S | N - I | Stability |
 | E | B + M | Evidence |
 
-Three-regime classification (communication shorthand — the signal is in the
+Three-regime classification (communication shorthand  --  the signal is in the
 continuous S and E values):
 
 | Class | Condition | Meaning |
@@ -151,7 +151,7 @@ The behavior audit protocol is described in:
 - [OpenML](https://openml.org), [UCI ML Repository](https://archive.ics.uci.edu):
   general-purpose dataset catalogs. The BRF Registry adds group-aware metadata,
   SHA-256 verification, versioning, and a standardized pipeline for
-  reliability auditing — filling a gap these platforms do not address.
+  reliability auditing  --  filling a gap these platforms do not address.
 
 ## License
 
