@@ -137,11 +137,15 @@ class BRFAnalyzer:
 
     # ---- improved reporting (v0.2) ----
 
-    def diagnose(self) -> Dict[str, str]:
+    def diagnose(self, n_samples: Optional[int] = None,
+                 n_features: Optional[int] = None,
+                 n_groups: Optional[int] = None) -> Dict[str, str]:
         """Return structured diagnosis explaining *why* the dataset is in its current state.
 
-        Replaces the opaque 3-class label with interpretable per-dimension
-        explanations, enabling benchmark designers to understand what to fix.
+        Args:
+            n_samples: Total sample count (for context-aware suggestions).
+            n_features: Feature count.
+            n_groups: Group count.
         """
         if not self._fitted:
             raise RuntimeError("call fit() before accessing diagnose()")
@@ -149,71 +153,81 @@ class BRFAnalyzer:
         issues = {}
         suggestions = {}
 
+        n = n_samples or 0
+        p = n_features or 0
+        g = n_groups or 0
+
         # --- Predictive signal (B) ---
         if self.B < 0:
             issues["B"] = (f"Model performs WORSE than the mean baseline "
-                           f"(B={self.B:.3f}). The features carry no useful "
-                           f"predictive signal for this target.")
-            suggestions["B"] = "Reconsider feature engineering or target definition."
+                           f"(B={self.B:.3f}). Features carry no useful signal.")
+            suggestions["B"] = ("Reconsider feature engineering and target definition. "
+                               "The chosen features cannot predict this target.")
         elif self.B < 0.05:
-            issues["B"] = (f"Marginal improvement over mean baseline "
-                           f"(B={self.B:.3f}). Features explain very little variance.")
-            suggestions["B"] = "Add more informative features or reframe the task."
+            issues["B"] = (f"Marginal signal (B={self.B:.3f}). "
+                           f"Features explain very little variance.")
+            suggestions["B"] = "Add more informative features or reframe the prediction task."
         elif self.B < 0.2:
-            issues["B"] = (f"Moderate predictive signal (B={self.B:.3f}).")
+            issues["B"] = (f"Moderate signal (B={self.B:.3f}).")
             suggestions["B"] = None
         else:
-            issues["B"] = (f"Strong predictive signal (B={self.B:.3f}).")
+            issues["B"] = (f"Strong signal (B={self.B:.3f}).")
             suggestions["B"] = None
 
         # --- Instability (I) ---
         if self.I > 1.0:
-            issues["I"] = (f"High cross-split instability (I={self.I:.3f}). "
-                           f"Model R^2 varies dramatically depending on which "
-                           f"samples happen to be in the test set.")
-            suggestions["I"] = ("Increase sample size (N), reduce feature count (p), "
-                               "or use regularization.")
+            per_group = f"~{n//g} per group" if g > 0 and n > 0 else ""
+            n_feat_ratio = f" (N/p={n//p})" if p > 0 and n > 0 else ""
+            issues["I"] = (f"High instability (I={self.I:.3f}). "
+                           f"R^2 varies dramatically across data splits.")
+            if n > 0 and n < 200:
+                suggestions["I"] = (f"Only N={n} samples{per_group}. "
+                                   f"Increase to 300+ for stable estimates.")
+            elif p > 0 and n > 0 and n / p < 10:
+                suggestions["I"] = (f"N/p={n//p} is low{n_feat_ratio}. "
+                                   f"Increase N or reduce features (currently {p}).")
+            else:
+                suggestions["I"] = "Increase N, reduce p, or use stronger regularization."
         elif self.I > 0.3:
             issues["I"] = (f"Moderate instability (I={self.I:.3f}).")
-            suggestions["I"] = "Consider larger N or fewer features for more stable estimates."
+            suggestions["I"] = "Consider larger N for more stable estimates."
         else:
-            issues["I"] = (f"Low instability (I={self.I:.3f}). "
-                           f"Model is robust to data split variation.")
+            issues["I"] = (f"Low instability (I={self.I:.3f}). Stable across splits.")
             suggestions["I"] = None
 
         # --- Null separation (N) ---
         if self.N < 0.5:
-            issues["N"] = (f"Model rarely beats permutation baseline "
-                           f"(N={self.N:.3f}). The signal is indistinguishable "
-                           f"from random noise.")
-            suggestions["N"] = ("The model is effectively fitting noise. "
-                               "Consider whether a predictive relationship exists.")
+            issues["N"] = (f"Signal indistinguishable from noise "
+                           f"(N={self.N:.3f}). Model rarely beats permutation.")
+            if self.B <= 0:
+                suggestions["N"] = "No predictive relationship detected. Reconsider features/target."
+            else:
+                suggestions["N"] = "Weak signal. Increase N or simplify the feature set."
         elif self.N < 0.8:
-            issues["N"] = (f"Model sometimes fails to beat permutation "
-                           f"(N={self.N:.3f}). Signal is present but inconsistent.")
-            suggestions["N"] = "Increase sample size or feature quality for more reliable separation."
+            issues["N"] = (f"Inconsistent signal separation (N={self.N:.3f}).")
+            suggestions["N"] = "Increase N or improve feature quality."
         else:
-            issues["N"] = (f"Model consistently beats permutation "
-                           f"(N={self.N:.3f}). Clear signal above noise.")
+            issues["N"] = (f"Clear signal above noise (N={self.N:.3f}).")
             suggestions["N"] = None
 
         # --- Metadata adequacy (M) ---
         if self.M < 0.1:
-            issues["M"] = (f"Insufficient group metadata (M={self.M:.3f}). "
-                           f"Groups are too few, highly imbalanced, or absent.")
-            suggestions["M"] = ("Add or improve group annotations. "
-                               "Consider whether an alternative grouping variable "
-                               "captures more meaningful structure.")
+            issues["M"] = (f"Insufficient group structure (M={self.M:.3f}). "
+                           f"Groups are too few, absent, or severely imbalanced.")
+            if g < 5:
+                suggestions["M"] = (f"Only {g} group(s). Add group annotations "
+                                   f"with >=5 categories for meaningful cross-group evaluation.")
+            else:
+                suggestions["M"] = (f"{g} groups but highly imbalanced. "
+                                   f"Use a more balanced grouping variable.")
         elif self.M < 0.3:
-            issues["M"] = (f"Weak group metadata (M={self.M:.3f}). "
-                           f"Group structure exists but is sparse or imbalanced.")
+            issues["M"] = (f"Weak group structure (M={self.M:.3f}).")
             suggestions["M"] = "Use a finer-grained grouping variable if available."
         elif self.M < 0.5:
-            issues["M"] = (f"Moderate group metadata (M={self.M:.3f}).")
+            issues["M"] = (f"Moderate group structure (M={self.M:.3f}).")
             suggestions["M"] = None
         else:
-            issues["M"] = (f"Strong group metadata (M={self.M:.3f}). "
-                           f"Group structure is well-defined and balanced.")
+            issues["M"] = (f"Strong group structure (M={self.M:.3f}).")
             suggestions["M"] = None
 
         # --- Synthesis ---
@@ -262,31 +276,41 @@ class BRFAnalyzer:
             "reference": f"BRF Registry v1.5 ({len(s_vals)} benchmarks)",
         }
 
-    def recommend(self) -> str:
-        """One-paragraph actionable recommendation for benchmark improvement."""
-        d = self.diagnose()
+    def recommend(self, n_samples: Optional[int] = None,
+                  n_features: Optional[int] = None,
+                  n_groups: Optional[int] = None) -> str:
+        """Actionable recommendations for benchmark improvement.
+
+        Args:
+            n_samples, n_features, n_groups: Optional context for concrete suggestions
+                (e.g., "Only N=151 samples. Increase to 300+").
+        """
+        d = self.diagnose(n_samples, n_features, n_groups)
         recs = d["recommendations"]
         if not recs:
-            return ("Benchmark metrics are within normal ranges. "
-                    "No specific action recommended.")
-        # Prioritize: B < 0 is most critical, then N < 0.5, then I > 1, then M < 0.1
-        priority = []
-        if self.B < 0:
-            priority.append("B")
-        if self.N < 0.5:
-            priority.append("N")
-        if self.I > 1.0:
-            priority.append("I")
-        if self.M < 0.1:
-            priority.append("M")
-        if not priority:
-            priority = [k for k in recs]
+            return "No issues found. Your benchmark metrics are within normal ranges."
 
-        lines = [
-            f"This benchmark has {len(recs)} dimension(s) needing attention. "
-            f"Primary concern: {recs[priority[0]]}"
-        ]
-        return " ".join(lines)
+        lines = []
+        for dim in ["B", "N", "I", "M"]:
+            if dim in recs:
+                lines.append(f"[{dim}] {recs[dim]}")
+        return "\n".join(lines)
+
+    def recommend_dict(self) -> Dict:
+        """Structured actionable recommendations as a dict.
+
+        Returns {dimension: {"issue": ..., "action": ..., "value": ...}}.
+        """
+        d = self.diagnose()
+        out = {}
+        for dim in ["B", "N", "I", "M"]:
+            if dim in d["details"] and dim in d["recommendations"]:
+                out[dim] = {
+                    "issue": d["details"][dim],
+                    "action": d["recommendations"][dim],
+                    "value": getattr(self, dim),
+                }
+        return out
 
     def _load_registry_ref(self) -> Optional[List[Dict]]:
         """Load Registry reference data for percentile ranking."""
