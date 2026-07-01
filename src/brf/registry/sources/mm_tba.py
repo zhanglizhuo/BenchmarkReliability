@@ -27,8 +27,8 @@ class MMTBASource(DatasetSource):
     name = "mm_tba"
     display_name = "MM-TBA Teaching Behavior Analysis"
     version = "1.0"
-    source_url = "https://github.com/broadsense/MM-TBA"
-    license_info = "TBD"
+    source_url = "https://doi.org/10.6084/m9.figshare.28942505"
+    license_info = "CC BY 4.0"
     reference = "Huang et al. (2025)"
     task = "regression"
     n_samples = 186
@@ -41,26 +41,24 @@ class MMTBASource(DatasetSource):
     def download(self):
         import urllib.request, zipfile, io, shutil
         dest_dir = self._ensure_cache_dir()
-        meta_path = dest_dir / "metadata.xlsx"
+        meta_path = dest_dir / "MM-TBA" / "metadata.xlsx"
         if meta_path.exists():
             return dest_dir
-        # Download repo zip from GitHub
-        zip_url = "https://github.com/broadsense/MM-TBA/archive/refs/heads/main.zip"
-        resp = urllib.request.urlopen(zip_url, timeout=120)
+        # Download from figshare
+        zip_url = "https://ndownloader.figshare.com/files/54255530"
+        resp = urllib.request.urlopen(zip_url, timeout=300)
         with zipfile.ZipFile(io.BytesIO(resp.read())) as z:
-            for member in z.namelist():
-                target = dest_dir / "/".join(member.split("/")[1:])
-                if not target.name:
-                    continue
-                target.parent.mkdir(parents=True, exist_ok=True)
-                with z.open(member) as src, open(target, "wb") as dst:
-                    shutil.copyfileobj(src, dst)
+            z.extractall(str(dest_dir))
         return dest_dir
 
     def prepare(self):
         import openpyxl
 
         root = self.download()
+        # Handle figshare zip structure: MM-TBA/MM-TBA/...
+        inner = root / "MM-TBA" / "MM-TBA"
+        if inner.exists():
+            root = inner
         lec_root = root / "Teacher_Lecture_Evaluation"
         meta_path = root / "metadata.xlsx"
 
