@@ -21,6 +21,7 @@ class StudentDropoutSource(DatasetSource):
     n_samples = 3630
     n_features = 36
     n_groups = 17
+    sha256 = "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae"
     grouping_description = "Course (17 programs)"
 
     def download(self):

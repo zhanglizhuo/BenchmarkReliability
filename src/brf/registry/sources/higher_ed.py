@@ -21,6 +21,7 @@ class HigherEdSource(DatasetSource):
     n_samples = 145
     n_features = 31
     n_groups = 9
+    sha256 = "d5905d231bedd7e4cdcf708fab55fc65b79dfe12012e846eccad3e88b5ecb019"
     grouping_description = "Course ID (9 courses)"
 
     def download(self):

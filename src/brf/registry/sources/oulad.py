@@ -22,6 +22,7 @@ class OULADSource(DatasetSource):
     n_samples = 32593
     n_features = 44
     n_groups = 22
+    sha256 = "9ce92381e4a0ac457f8e251b2eb2c179ed51e023ab30d1d671a0268bd62316ba"
     grouping_description = "Course module + presentation (22)"
 
     def download(self):
