@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "benchmark-reliability"
-version = "0.1.5"
-description = "Benchmark Reliability Framework (BRF) - dataset-level reliability auditing for predictive benchmarks"
+version = "0.1.6"
+description = "Benchmark Reliability Framework (BRF) - dataset-level reliability auditing with built-in benchmark registry"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
 authors = [
     { name = "zhanglizhuo", email = "zhanglizhuo@gmail.com" },
 ]
-keywords = ["benchmark reliability", "dataset auditing", "educational AI", "machine learning"]
+keywords = ["benchmark reliability", "dataset auditing", "educational AI", "machine learning", "registry"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -28,7 +28,13 @@ dependencies = [
     "numpy>=1.21",
     "scikit-learn>=1.0",
     "matplotlib>=3.5",
+    "pandas>=1.1",
+    "scipy>=1.5",
+    "openml>=0.12",
 ]
+
+[project.scripts]
+brf = "brf.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/zhanglizhuo/BenchmarkReliability"
@@ -39,3 +45,6 @@ license-files = []
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"brf.registry" = ["manifest.yaml"]
