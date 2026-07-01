@@ -50,7 +50,7 @@ print(analyzer.recommend())
 
 ```bash
 $ brf registry list
-BRF Registry -- 16 datasets
+BRF Registry
 
   assistments          ASSISTments 2009-2010           N= 3729  G= 124
   college_scorecard    US College Scorecard            N= 7804  G=  59
@@ -68,7 +68,7 @@ BRF Audit: Teaching Assistant Evaluation (tae)
 ### Download and verify all datasets
 
 ```bash
-$ brf registry sync     # download + SHA-256 verify all 16 datasets
+$ brf registry sync     # download + SHA-256 verify all
 $ brf registry info oulad
   name: oulad
   display_name: Open University Learning Analytics Dataset
