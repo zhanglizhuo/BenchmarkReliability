@@ -11,7 +11,7 @@ Requires Python 3.8+ with numpy, scikit-learn, pandas, scipy, openml.
 
 ## Quick Start
 
-### Load a real dataset and audit it
+### Audit a dataset from the Registry
 
 ```python
 from brf.registry import REGISTRY_SOURCES
