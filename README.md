@@ -11,20 +11,28 @@ Requires Python 3.8+ with numpy, scikit-learn, pandas, scipy, openml.
 
 ## Quick Start
 
-### Run a BRF audit
+### Load a real dataset and audit it
 
 ```python
-import numpy as np
+from brf.registry import REGISTRY_SOURCES
 from brf import BRFAnalyzer
+from sklearn.preprocessing import StandardScaler
 
-X = np.random.randn(200, 10)
-y = np.random.randn(200)
-groups = np.random.choice(["A", "B", "C"], 200)
+# Load Teaching Assistant Evaluation (UCI ID 100)
+source = REGISTRY_SOURCES["tae"]
+X, y, groups, metadata = source.prepare()
 
-analyzer = BRFAnalyzer(n_splits=30, n_permutations=200).fit(X, y, groups=groups)
+# Standardize and audit
+X_scaled = StandardScaler().fit_transform(X)
+analyzer = BRFAnalyzer(n_splits=30, n_permutations=200).fit(X_scaled, y, groups=groups)
+
 print(analyzer.brf_vector)
-# {'B': 0.12, 'I': 0.05, 'N': 0.97, 'M': 0.82,
-#  'S': 0.93, 'E': 0.94, 'class': 'Reliable'}
+# {'B': 0.12, 'I': 1.36, 'N': 0.93, 'M': 0.63,
+#  'S': -0.42, 'E': 0.75, 'class': 'Void'}
+print(source.metadata())
+# {'name': 'tae', 'display_name': 'Teaching Assistant Evaluation',
+#  'n_samples': 151, 'n_features': 4, 'n_groups': 25,
+#  'education_level': 'Higher Education', 'country': 'US', ...}
 ```
 
 ### Browse the BRF Benchmark Registry
@@ -44,14 +52,6 @@ BRF Audit: Teaching Assistant Evaluation (tae)
   N=151, p=4, G=25
   B=0.1172  I=1.3559  N=0.9333  M=0.6288
   S=-0.4226  E=0.7460  ->  Void
-```
-
-```python
-from brf.registry import REGISTRY_SOURCES
-
-source = REGISTRY_SOURCES["tae"]
-X, y, groups, metadata = source.prepare()
-# X.shape = (151, 4), groups = 25 instructor labels
 ```
 
 ### Download and verify all datasets
