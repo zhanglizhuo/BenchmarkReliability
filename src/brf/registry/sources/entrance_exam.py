@@ -1,4 +1,7 @@
-"""Entrance Exam (UCI ID 582)."""
+"""Entrance Exam (UCI ID 582).
+
+Download from UCI, one-hot encode, extract target/features/groups.
+"""
 
 import numpy as np
 
@@ -17,39 +20,41 @@ class EntranceExamSource(DatasetSource):
     n_samples = 666
     n_features = 49
     n_groups = 3
-    grouping_description = "Qualification (3 categories)"
+    grouping_description = "Qualification board (3: SEBA/CBSE/OTHERS)"
 
     def download(self):
-        from pathlib import Path as P
-        ba_root = P(__file__).resolve().parent.parent.parent.parent / "AutoResearchClaw" / "BehaviorAudit"
-        exam_path = ba_root / "datasets" / "StudentExam"
-        if exam_path.exists():
-            return exam_path
-        # Fallback: download from UCI
-        import urllib.request, zipfile, io
-        dest = self._ensure_cache_dir()
-        resp = urllib.request.urlopen(self.source_url)
+        import urllib.request, zipfile, io, shutil
+        dest_dir = self._ensure_cache_dir()
+        csv_path = dest_dir / "student_entrance_582.csv"
+        if csv_path.exists():
+            return csv_path
+        resp = urllib.request.urlopen(self.source_url, timeout=60)
         with zipfile.ZipFile(io.BytesIO(resp.read())) as z:
-            z.extractall(str(dest))
-        return dest
+            z.extractall(str(dest_dir))
+        for f in dest_dir.glob("**/*.csv"):
+            if "entrance" in f.name.lower() or "582" in f.name:
+                return f
+        return dest_dir
 
     def prepare(self):
-        import sys
-        from pathlib import Path as P
+        import pandas as pd
 
-        ba_root = P(__file__).resolve().parent.parent.parent.parent / "AutoResearchClaw" / "BehaviorAudit"
-        if str(ba_root) not in sys.path:
-            sys.path.insert(0, str(ba_root))
+        path = self.download()
+        df = pd.read_csv(str(path))
 
-        from framework.adapters import EntranceExamAdapter
-        adapter = EntranceExamAdapter()
-        dataset_root = str(ba_root / "datasets" / "StudentExam")
-        bundle = adapter.load(dataset_root=dataset_root)
+        label_map = {"Average": 0, "Good": 1, "Vg": 2, "Excellent": 3}
+        y = df["Performance"].map(label_map).values.astype(float)
+        groups = df["Class_ten_education"].astype(str).values
+
+        feat_df = df.drop(columns=["Performance"])
+        cat_cols = feat_df.select_dtypes(include=["object"]).columns.tolist()
+        X_df = pd.get_dummies(feat_df, columns=cat_cols, dummy_na=False)
+        X = X_df.fillna(0).astype(float).values
+
         card = {
-            "n_samples": len(bundle.y),
-            "n_features": bundle.X.shape[1],
-            "n_groups": len(np.unique(bundle.group_ids)),
+            "n_samples": len(y), "n_features": X.shape[1],
+            "n_groups": df["Class_ten_education"].nunique(),
             "source": "UCI ID 582",
-            "features": [f"feat_{i}" for i in range(bundle.X.shape[1])],
+            "features": list(X_df.columns)[:10] + [f"... ({X.shape[1]} total)"],
         }
-        return bundle.X, bundle.y, np.array(bundle.group_ids), card
+        return X, y, groups, card

@@ -1,4 +1,8 @@
-"""Higher Education Students Performance (UCI ID 856)."""
+"""Higher Education Students Performance (UCI ID 856).
+
+Download from UCI, one-hot encode. Target: OUTPUT Grade (0-7).
+Group: Course ID (9 groups).
+"""
 
 import numpy as np
 
@@ -17,37 +21,34 @@ class HigherEdSource(DatasetSource):
     n_samples = 145
     n_features = 31
     n_groups = 9
-    grouping_description = "Course (9 categories)"
+    grouping_description = "Course ID (9 courses)"
 
     def download(self):
-        from pathlib import Path as P
-        ba_root = P(__file__).resolve().parent.parent.parent.parent / "AutoResearchClaw" / "BehaviorAudit"
-        exam_path = ba_root / "datasets" / "StudentExam"
-        if exam_path.exists():
-            return exam_path
         import urllib.request, zipfile, io
-        dest = self._ensure_cache_dir()
-        resp = urllib.request.urlopen(self.source_url)
+        dest_dir = self._ensure_cache_dir()
+        csv_path = dest_dir / "higher_ed_856.csv"
+        if csv_path.exists():
+            return csv_path
+        resp = urllib.request.urlopen(self.source_url, timeout=60)
         with zipfile.ZipFile(io.BytesIO(resp.read())) as z:
-            z.extractall(str(dest))
-        return dest
+            z.extractall(str(dest_dir))
+        for f in dest_dir.glob("**/*.csv"):
+            if "higher" in f.name.lower() or "856" in f.name:
+                return f
+        return dest_dir
 
     def prepare(self):
-        import sys
-        from pathlib import Path as P
+        import pandas as pd
 
-        ba_root = P(__file__).resolve().parent.parent.parent.parent / "AutoResearchClaw" / "BehaviorAudit"
-        if str(ba_root) not in sys.path:
-            sys.path.insert(0, str(ba_root))
-
-        from framework.adapters import HigherEdAdapter
-        adapter = HigherEdAdapter()
-        bundle = adapter.load(dataset_root=str(ba_root / "datasets" / "StudentExam"))
-        card = {
-            "n_samples": len(bundle.y),
-            "n_features": bundle.X.shape[1],
-            "n_groups": len(np.unique(bundle.group_ids)),
-            "source": "UCI ID 856",
-            "features": [f"feat_{i}" for i in range(bundle.X.shape[1])],
-        }
-        return bundle.X, bundle.y, np.array(bundle.group_ids), card
+        path = self.download()
+        df = pd.read_csv(str(path))
+        y = df["OUTPUT Grade"].values.astype(float)
+        groups = df["Course ID"].astype(str).values
+        feat_df = df.drop(columns=["OUTPUT Grade"])
+        cat_cols = feat_df.select_dtypes(include=["object"]).columns.tolist()
+        X_df = pd.get_dummies(feat_df, columns=cat_cols, dummy_na=False)
+        X = X_df.fillna(0).astype(float).values
+        card = {"n_samples": len(y), "n_features": X.shape[1],
+                "n_groups": df["Course ID"].nunique(), "source": "UCI ID 856",
+                "features": list(X_df.columns)[:8] + [f"... ({X.shape[1]} total)"]}
+        return X, y, groups, card
