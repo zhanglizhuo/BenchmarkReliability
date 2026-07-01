@@ -24,14 +24,23 @@ class EntranceExamSource(DatasetSource):
     grouping_description = "Qualification board (3: SEBA/CBSE/OTHERS)"
 
     def download(self):
-        import urllib.request, zipfile, io, shutil
+        import urllib.request, zipfile, io, shutil, pandas as pd
         dest_dir = self._ensure_cache_dir()
         csv_path = dest_dir / "student_entrance_582.csv"
         if csv_path.exists():
             return csv_path
-        resp = urllib.request.urlopen(self.source_url, timeout=60)
-        with zipfile.ZipFile(io.BytesIO(resp.read())) as z:
-            z.extractall(str(dest_dir))
+        # Try direct UCI URL first
+        try:
+            resp = urllib.request.urlopen(self.source_url, timeout=60)
+            with zipfile.ZipFile(io.BytesIO(resp.read())) as z:
+                z.extractall(str(dest_dir))
+        except Exception:
+            # Fallback: ucimlrepo API
+            from ucimlrepo import fetch_ucirepo
+            d = fetch_ucirepo(id=582)
+            df = d.data.originals
+            df.to_csv(str(csv_path), index=False)
+            return csv_path
         for f in dest_dir.glob("**/*.csv"):
             if "entrance" in f.name.lower() or "582" in f.name:
                 return f
