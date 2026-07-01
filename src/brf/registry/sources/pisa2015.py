@@ -22,6 +22,7 @@ class PISA2015Source(DatasetSource):
     n_features = 2
     n_groups = 73
     grouping_description = "Country (73 groups)"
+    sha256 = "2a7d85728ee2cde20c1c88f615e7deaaa6c3e3f92f7b7503a086b982601df7bb"
     notes = "519K students from 73 countries. Target: overall science accuracy."
 
     def download(self):

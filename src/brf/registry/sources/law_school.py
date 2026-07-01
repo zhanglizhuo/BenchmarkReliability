@@ -22,6 +22,7 @@ class LawSchoolSource(DatasetSource):
     n_features = 7
     n_groups = 6
     grouping_description = "Cluster (6 groups)"
+    sha256 = "1caefd94030c169f68ceb5519348179d227e8bd5c63a9b70b61a0d483710e0b8"
     notes = "20.8K law school applicants. Target: bar exam passage."
 
     def download(self):
